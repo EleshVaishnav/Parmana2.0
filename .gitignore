@@ -1,0 +1,27 @@
+# Environment variables
+.env
+.env.local
+
+# Python caches and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Vector Database (Local Data)
+chroma_db/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Stray files created during testing
+API.txt
+parmana/

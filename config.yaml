@@ -1,0 +1,21 @@
+llm:
+  default_provider: "groq" # Options: openai, anthropic, gemini, groq, custom
+  model_name: "llama-3.3-70b-versatile"
+  temperature: 0.2
+  max_tokens: 2000
+
+memory:
+  short_term_max_messages: 20
+  vector_db_path: "./chroma_db"
+  chunk_size: 500
+
+channels:
+  active: "telegram" # Switch between telegram / whatsapp / cli
+  telegram:
+    enabled: true
+  whatsapp:
+    enabled: false
+
+tools:
+  web_search_enabled: true
+  calculator_enabled: true

@@ -1,0 +1,11 @@
+langchain==0.1.0
+litellm>=1.0.0
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
+python-telegram-bot>=20.0
+duckduckgo-search>=4.0.0
+pydantic>=2.0.0
+pyyaml>=6.0
+python-dotenv>=1.0.0
+PyMuPDF>=1.20 # For reading docs/vision integration if needed
+requests>=2.30.0
