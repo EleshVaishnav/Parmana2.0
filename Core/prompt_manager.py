@@ -15,8 +15,12 @@ class PromptManager:
         """Constructs the system message dynamically injected with long-term memory."""
         prompt = self._base_prompt
         
+        from datetime import datetime
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        prompt += f"\n\nCURRENT SYSTEM CAPABILITIES & AWARENESS:\nThe current system date and time is: {current_time}\n"
+
         if context_snippets and len(context_snippets) > 0:
-            prompt += "\n\n--- RELEVANT MEMORY RETRIEVED ---\n"
+            prompt += "\n--- RELEVANT MEMORY RETRIEVED ---\n"
             for i, snip in enumerate(context_snippets):
                 prompt += f"{i+1}. {snip}\n"
             prompt += "--- END RELEVANT MEMORY ---\n"

@@ -1,21 +1,16 @@
-llm:
-  default_provider: "openai" # Options: openai, anthropic, gemini, groq, custom
-  model_name: "gpt-4o"
-  temperature: 0.2
-  max_tokens: 2000
-
-memory:
-  short_term_max_messages: 20
-  vector_db_path: "./chroma_db"
-  chunk_size: 500
-
 channels:
-  active: "telegram" # Switch between telegram / whatsapp / cli
+  active: telegram
   telegram:
+    allowed_username: '*'
     enabled: true
   whatsapp:
     enabled: false
-
+llm:
+  default_provider: groq
+  model_name: llama-3.3-70b-versatile
+memory:
+  chunk_size: 500
+  short_term_max_messages: 20
+  vector_db_path: ./chroma_db
 tools:
-  web_search_enabled: true
-  calculator_enabled: true
+  web_search: true

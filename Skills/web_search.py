@@ -1,5 +1,8 @@
 from .registry import registry
-from duckduckgo_search import DDGS
+try:
+    from ddgs import DDGS
+except ImportError:
+    from duckduckgo_search import DDGS
 
 @registry.register(
     name="web_search",
@@ -10,15 +13,14 @@ from duckduckgo_search import DDGS
             "description": "The search query to look up on the web."
         },
         "max_results": {
-            "type": "string",
-            "description": "Maximum number of results to return (default '5')."
+            "type": "integer",
+            "description": "Maximum number of results to return (default 5)."
         }
     }
 )
-def web_search(query: str, max_results: str = "5") -> str:
+def web_search(query: str, max_results: int = 5) -> str:
     """Perform a web search using DuckDuckGo."""
     try:
-        max_results = int(max_results)
         with DDGS() as ddgs:
             results = [r for r in ddgs.text(query, max_results=max_results)]
             
