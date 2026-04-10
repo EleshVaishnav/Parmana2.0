@@ -12,6 +12,15 @@ class TelegramChannel:
         if not update.message or not update.message.text:
             return
             
+        allowed_user = self.agent.config.get("channels", {}).get("telegram", {}).get("allowed_username", "*")
+        username = update.message.from_user.username
+        
+        if allowed_user != "*" and username != allowed_user:
+            from Core.logger import logger
+            logger.warning(f"[Security] Blocked unauthorized Telegram message from @{username}")
+            return
+
+            
         user_msg = update.message.text
         chat_id = update.message.chat_id
         

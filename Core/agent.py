@@ -5,6 +5,7 @@ from Memory.vector_memory import vector_memory # initialized globally
 from Core.prompt_manager import PromptManager
 from Skills.registry import registry
 from Vision.vision_handler import VisionHandler
+from Core.logger import logger
 
 class ParmanaAgent:
     def __init__(self, config: dict):
@@ -32,7 +33,7 @@ class ParmanaAgent:
             
             try:
                 args = json.loads(args_str)
-                print(f"[ACTION] Executing {func_name} with args {args}")
+                logger.info(f"[ACTION] Executing {func_name} with args {args}")
                 result_str = registry.execute(func_name, **args)
             except Exception as e:
                 result_str = f"Error interpreting or executing tool: {str(e)}"

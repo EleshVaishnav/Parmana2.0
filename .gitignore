@@ -25,3 +25,7 @@ Thumbs.db
 # Stray files created during testing
 API.txt
 parmana/
+
+# Logs
+logs/
+*.log

@@ -1,6 +1,6 @@
 llm:
-  default_provider: "groq" # Options: openai, anthropic, gemini, groq, custom
-  model_name: "llama-3.3-70b-versatile"
+  default_provider: "openai" # Options: openai, anthropic, gemini, groq, custom
+  model_name: "gpt-4o"
   temperature: 0.2
   max_tokens: 2000
 
