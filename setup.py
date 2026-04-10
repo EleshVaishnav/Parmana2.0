@@ -139,6 +139,8 @@ def main():
     # Determine default provider string for Litellm config
     provider_code = selected_provider["name"].lower().split()[0]
     
+    model_name = Prompt.ask(f"Enter the specific model name you want to run via [yellow]{selected_provider['name']}[/yellow] (e.g., gpt-4o, llama-3.3-70b-versatile, claude-3-5-sonnet-20241022)")
+    
     # 3. Skills Selection
     console.print(Panel("[bold cyan]Step 2: Select Skills[/bold cyan]"))
     skill_names = list(SKILL_CATEGORIES.keys())
@@ -219,7 +221,7 @@ def main():
     config_dict = {
         "llm": {
             "default_provider": provider_code,
-            "model_name": ""
+            "model_name": model_name.strip()
         },
         "memory": {
             "short_term_max_messages": 20,
