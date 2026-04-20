@@ -6,12 +6,12 @@ from logging.handlers import RotatingFileHandler
 os.makedirs("logs", exist_ok=True)
 
 # Create a custom logger
-logger = logging.getLogger("Parmana")
+logger = logging.getLogger("Deep Claw")
 logger.setLevel(logging.DEBUG)
 
 # Create handlers
 c_handler = logging.StreamHandler()
-f_handler = RotatingFileHandler("logs/parmana.log", maxBytes=5*1024*1024, backupCount=3, encoding="utf-8")
+f_handler = RotatingFileHandler("logs/deep claw.log", maxBytes=5*1024*1024, backupCount=3, encoding="utf-8")
 
 c_handler.setLevel(logging.INFO)
 f_handler.setLevel(logging.DEBUG)

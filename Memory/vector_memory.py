@@ -3,7 +3,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 
 class VectorMemory:
-    def __init__(self, db_path: str = "./chroma_db", collection_name: str = "parmana_memory"):
+    def __init__(self, db_path: str = "./chroma_db", collection_name: str = "deepclaw_memory"):
         self.client = chromadb.PersistentClient(path=db_path)
         # Using default sentence-transformers embedding function if none provided
         self.ef = embedding_functions.DefaultEmbeddingFunction()
@@ -36,6 +36,20 @@ class VectorMemory:
         if results and "documents" in results and results["documents"]:
             return results["documents"][0] # Return the list of top matches
         return []
+
+    def get_reminders(self) -> dict:
+        """Fetch all reminders actively stored in the DB."""
+        try:
+            return self.collection.get(where={"type": "reminder"})
+        except Exception:
+            return {"ids": [], "metadatas": [], "documents": []}
+
+    def delete_memory(self, doc_id: str):
+        """Removes a specific document by its ID."""
+        try:
+            self.collection.delete(ids=[doc_id])
+        except Exception:
+            pass
 
 # Initialize global vector memory instance placeholder, will be instantiated by main/agent
 vector_memory = None

@@ -1,12 +1,29 @@
 import asyncio
+import concurrent.futures
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
-from Core.agent import ParmanaAgent
+from Core.agent import DeepClawAgent
 
 class TelegramChannel:
-    def __init__(self, token: str, agent: ParmanaAgent):
+    def __init__(self, token: str, agent: DeepClawAgent):
         self.token = token
         self.agent = agent
+        # Use a single thread to guarantee Playwright stability
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self.app = None
+        
+        # Connect proactive notification hook
+        def proactive_send(user_id, message):
+            if self.app:
+                try:
+                    # Use the background loop to send messages
+                    import asyncio
+                    self.app.loop.create_task(self.app.bot.send_message(chat_id=user_id, text=message))
+                except Exception as e:
+                    from Core.logger import logger
+                    logger.error(f"[Telegram] Proactive send failed: {e}")
+
+        self.agent.notification_hook = proactive_send
 
     async def _handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message or not update.message.text:
@@ -31,7 +48,7 @@ class TelegramChannel:
             # We run the agent inference in a thread so we don't block the async event loop
             # if the agent's LLM calls are synchronous.
             loop = asyncio.get_running_loop()
-            reply = await loop.run_in_executor(None, self.agent.chat, user_msg)
+            reply = await loop.run_in_executor(self.executor, self.agent.chat, user_msg)
             
             await context.bot.send_message(chat_id=chat_id, text=reply)
         except Exception as e:
@@ -39,8 +56,8 @@ class TelegramChannel:
 
     def start(self):
         print("[Telegram] Starting bot...")
-        app = ApplicationBuilder().token(self.token).build()
-        app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self._handle_message))
+        self.app = ApplicationBuilder().token(self.token).build()
+        self.app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self._handle_message))
         
         # Start polling
-        app.run_polling()
+        self.app.run_polling()

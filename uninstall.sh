@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Uninstalling Parmana 2.0 Environment..."
+echo "Uninstalling Deep Claw 2.0 Environment..."
 
 if [ -d ".venv" ]; then
     echo "Removing virtual environment (.venv)..."

@@ -1,13 +1,13 @@
 import json
 from LLM_Gateway.provider_router import ProviderRouter
 from Memory.session_memory import SessionMemory
-from Memory.vector_memory import vector_memory # initialized globally
+import Memory.vector_memory as vm
 from Core.prompt_manager import PromptManager
 from Skills.registry import registry
 from Vision.vision_handler import VisionHandler
 from Core.logger import logger
 
-class ParmanaAgent:
+class DeepClawAgent:
     def __init__(self, config: dict):
         self.config = config
         
@@ -22,6 +22,15 @@ class ParmanaAgent:
         mem_cfg = config.get("memory", {})
         self.session_memory = SessionMemory(max_messages=mem_cfg.get("short_term_max_messages", 20))
         self.prompt_manager = PromptManager()
+        self.notification_hook = None
+        self.current_sender_id = None  # Tracks the real sender for the current chat turn
+        
+        try:
+            import Skills.scheduling as sched
+            sched.global_notification_hook = lambda user, msg: self.notification_hook(user, msg) if self.notification_hook else None
+            sched._current_agent_ref = self  # Allow scheduler to read real sender_id
+        except Exception:
+            pass
         
     def _execute_tool_calls(self, tool_calls) -> list:
         results = []
@@ -50,62 +59,70 @@ class ParmanaAgent:
             
         return results
 
-    def chat(self, user_input: str, image_path: str = None) -> str:
+    def chat(self, user_input: str, image_path: str = None, sender_id: str = None) -> str:
         """
         Main cognitive loop:
         1. Query Vector Memory
         2. Construct system prompt
         3. Iterate through LLM thinking -> Tool Calling -> LLM Response until final text answer
         """
+        # Track the real sender for this turn (used by scheduling system)
+        self.current_sender_id = sender_id
+        
         # 1. Retrieve associated long-term memory
         context = []
-        if vector_memory:
-            context = vector_memory.search_memory(user_input, n_results=3)
+        if vm.vector_memory:
+            context = vm.vector_memory.search_memory(user_input, n_results=3)
 
         # 2. Add System Prompt to messages temporarily
         system_msg = self.prompt_manager.construct_system_message(context)
+        if sender_id:
+            system_msg["content"] += f"\n\n[CONTEXT]\nThe current user interacting with you has the ID: {sender_id}. When using schedule_action, you MUST use EXACTLY this ID as target_user_id: {sender_id}"
         
         # 3. Handle User Input (Vision vs Text)
-        message_content = user_input
+        message_content = f"<user_input>\n{user_input}\n</user_input>"
         if image_path:
-            message_content = VisionHandler.construct_vision_message(user_input, image_path)
+            message_content = VisionHandler.construct_vision_message(f"<user_input>\n{user_input}\n</user_input>", image_path)
             
         self.session_memory.add_message("user", message_content)
         
         # 4. Cognitive Loop
         tools = registry.get_schemas()
-        max_loops = 5
+        max_loops = 10  # Increased for browser tasks that need many steps
         loops = 0
         
         while loops < max_loops:
             messages = [system_msg] + self.session_memory.get_history()
             
+            # On the last loop, remove tools to FORCE a text answer from the LLM
+            is_last_loop = (loops >= max_loops - 2)
+            active_tools = None if is_last_loop else (tools if tools else None)
+            
             # Call LLM
             response = self.router.chat_completion(
                 messages=messages,
-                tools=tools if tools else None
+                tools=active_tools
             )
             
             msg_obj = response.choices[0].message
             
-            # If standard response
+            # If standard text response → return it
             if not msg_obj.tool_calls:
+                content = msg_obj.content or "Done."
                 # Save assistant response to session memory
-                self.session_memory.add_message("assistant", msg_obj.content)
+                self.session_memory.add_message("assistant", content)
                 
                 # Save user query + assistant answer to vector memory
-                if vector_memory:
-                    combined = f"User: {user_input}\nParmana: {msg_obj.content}"
-                    vector_memory.add_memory(combined)
+                if vm.vector_memory:
+                    combined = f"User: {user_input}\nDeepClaw: {content}"
+                    vm.vector_memory.add_memory(combined)
                     
-                return msg_obj.content
+                return content
                 
-            # If tool calls
-            # Save the assistant's intention to call tools
+            # If tool calls → execute them
             tool_call_dicts = [m.model_dump() for m in msg_obj.tool_calls] if hasattr(msg_obj.tool_calls[0], "model_dump") else msg_obj.tool_calls
             self.session_memory.add_message("assistant", content=msg_obj.content, tool_calls=tool_call_dicts)
             
-            # Execute tools
             tool_responses = self._execute_tool_calls(msg_obj.tool_calls)
             for tr in tool_responses:
                 self.session_memory.add_message(
@@ -116,5 +133,15 @@ class ParmanaAgent:
                 )
                 
             loops += 1
-            
-        return "Error: Brain loop max iterations reached without final answer."
+        
+        # Absolute fallback — ask LLM to summarize what happened
+        try:
+            messages = [system_msg] + self.session_memory.get_history() + [{
+                "role": "user",
+                "content": "Summarize what you did so far in one or two sentences for the user."
+            }]
+            fallback = self.router.chat_completion(messages=messages, tools=None)
+            return fallback.choices[0].message.content or "I completed the task but could not prepare a summary."
+        except Exception:
+            return "I ran into an issue while processing your request. Please try again."
+

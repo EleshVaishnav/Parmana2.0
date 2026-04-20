@@ -7,13 +7,13 @@ echo -e "\e[34m | |_) / _ \ | |_) | |\/| | / _ \ |  \| | / _ \     __) | | | | |
 echo -e "\e[34m |  __/ ___ \|  _ <| |  | |/ ___ \| |\  |/ ___ \   / __/ _| |_| |\e[0m"
 echo -e "\e[34m |_| /_/   \_\_| \_\_|  |_/_/   \_\_| \_/_/   \_\ |_____(_)\___/ \e[0m"
 echo ""
-echo "Bootstrapping Parmana 2.0 Installer..."
+echo "Bootstrapping Deep Claw 2.0 Installer..."
 
 # If we are running this via one-liner over the web, clone the repo automatically!
 if [ ! -f "setup.py" ]; then
     echo -e "\e[33mRemote execution detected. Cloning repository...\e[0m"
-    git clone https://github.com/EleshVaishnav/Parmana2.0.git
-    cd Parmana2.0 || exit 1
+    git clone https://github.com/EleshVaishnav/DeepClaw2.0.git
+    cd DeepClaw2.0 || exit 1
 fi
 
 # Create virtual environment

@@ -1,4 +1,4 @@
-Write-Host "Uninstalling Parmana 2.0 Environment..." -ForegroundColor Yellow
+Write-Host "Uninstalling Deep Claw 2.0 Environment..." -ForegroundColor Yellow
 
 if (Test-Path ".venv") {
     Write-Host "Removing virtual environment (.venv)..."

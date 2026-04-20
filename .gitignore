@@ -29,3 +29,7 @@ parmana/
 # Logs
 logs/
 *.log
+
+# Node & JS Temp
+node_modules/
+Channels/whatsapp_bridge/auth_info_baileys/

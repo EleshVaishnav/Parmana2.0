@@ -6,10 +6,11 @@ class ToolRegistry:
         self.tools: Dict[str, Callable] = {}
         self.schemas: List[Dict[str, Any]] = []
 
-    def register(self, name: str, description: str, parameters: Dict[str, Any]):
+    def register(self, name: str, description: str, parameters: Dict[str, Any], required: list = None):
         """Decorator to register a tool function."""
         def decorator(func: Callable):
             self.tools[name] = func
+            req = required if required is not None else list(parameters.keys())
             self.schemas.append({
                 "type": "function",
                 "function": {
@@ -18,7 +19,7 @@ class ToolRegistry:
                     "parameters": {
                         "type": "object",
                         "properties": parameters,
-                        "required": list(parameters.keys())
+                        "required": req
                     }
                 }
             })

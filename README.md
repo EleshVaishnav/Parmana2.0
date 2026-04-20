@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚙️ Parmana 2.0
+# ⚙️ Deep Claw 2.0
 **The Ultimate Modular Agentic Framework**
 
 A highly flexible, extensible, and powerful conversational agent framework built to flawlessly fuse Multi-Provider LLMs, Persistent Memory, Terminal Access, and multi-channel interfaces into one autonomous powerhouse.
@@ -17,7 +17,7 @@ A highly flexible, extensible, and powerful conversational agent framework built
 - 🔧 **Expansive Modular Skill Engine**: An extensible `@registry.register` system that gives your LLM access to execute explicit Python functions.
 - 👁️ **Multi-modal Vision Handlers**: Native image handling for multimodal cognitive processing.
 - 📡 **Multi-Channel Deployments**: Natively built for Telegram integration with a secure whitelisting system, with placeholders for WhatsApp and a dedicated CLI testing mode.
-- 🛡️ **Intelligent Background Logging**: Uses a resilient, rotating file handler system dumping outputs directly into `logs/parmana.log` for debugging unmonitored production cycles.
+- 🛡️ **Intelligent Background Logging**: Uses a resilient, rotating file handler system dumping outputs directly into `logs/deep claw.log` for debugging unmonitored production cycles.
 
 ## 🚀 Installation & Setup
 
@@ -26,13 +26,13 @@ We have stripped away complex setup environments and replaced them with a stunni
 ### 🪟 Windows (Powershell)
 Run this one-liner straight in your PowerShell:
 ```powershell
-iwr -useb https://raw.githubusercontent.com/EleshVaishnav/Parmana2.0/main/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/EleshVaishnav/DeepClaw2.0/main/install.ps1 | iex
 ```
 *(Alternatively, you can manually clone the repo and drag-and-drop `install.ps1` into your terminal).*
 
 ### 🍎 Linux / macOS
 ```bash
-curl -sSL https://raw.githubusercontent.com/EleshVaishnav/Parmana2.0/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/EleshVaishnav/DeepClaw2.0/main/install.sh | bash
 ```
 *(Alternatively, clone the repo and run `bash install.sh`).*
 
@@ -62,7 +62,7 @@ If your python environment ever breaks or you simply want to reset the cache, ru
 ---
 
 ## 🛠️ The Skills Architecture
-The heart of Parmana 2.0 is its `@registry` system, allowing the agent to break out of the text window and affect the real world.
+The heart of Deep Claw 2.0 is its `@registry` system, allowing the agent to break out of the text window and affect the real world.
 
 ### 📦 Pre-Installed Core Skills
 These ship naturally with the framework:
@@ -83,7 +83,7 @@ During the interactive `setup.py` phase, you can strictly select additional adva
 ## 📁 Project Structure
 
 ```
-Parmana2.0/
+DeepClaw2.0/
 ├── Channels/               # Handlers for sending/receiving messages (Telegram, WhatsApp)
 ├── Core/                   # The Brain: LLM orchestrator, prompts, and loggers
 ├── LLM_Gateway/            # LiteLLM routing architecture for 27+ providers

@@ -9,12 +9,13 @@ def check_dependencies():
         import rich
         import yaml
         import requests
+        import questionary
     except ImportError:
         missing = True
 
     if missing:
         print("\nInstalling setup wizard dependencies...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "rich", "pyyaml", "requests"], stdout=subprocess.DEVNULL)
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "rich", "pyyaml", "requests", "questionary"], stdout=subprocess.DEVNULL)
         os.execv(sys.executable, ['python', __file__] + sys.argv[1:])
 
 check_dependencies()
@@ -25,6 +26,7 @@ from rich.prompt import Prompt, Confirm
 from rich import print as rprint
 import yaml
 import requests
+import questionary
 
 console = Console()
 
@@ -111,18 +113,18 @@ def main():
 
     # 2. Provider Selection
     console.print(Panel("[bold cyan]Step 1: Select LLM Provider[/bold cyan]"))
-    for idx, provider in enumerate(PROVIDERS):
-        console.print(f"[green]{idx + 1}[/green]. {provider['name']}")
     
-    provider_idx = -1
-    while not (0 <= provider_idx < len(PROVIDERS)):
-        try:
-            user_input = Prompt.ask("\nSelect your provider by number")
-            provider_idx = int(user_input) - 1
-        except ValueError:
-            pass
-
-    selected_provider = PROVIDERS[provider_idx]
+    provider_choices = [p["name"] for p in PROVIDERS]
+    selected_provider_name = questionary.select(
+        "Select your LLM provider:",
+        choices=provider_choices
+    ).ask()
+    
+    if not selected_provider_name:
+        console.print("\n[red]Setup cancelled.[/red]")
+        sys.exit(1)
+        
+    selected_provider = next(p for p in PROVIDERS if p["name"] == selected_provider_name)
     env_vars_needed = selected_provider["env_var"]
     
     env_updates = {}
@@ -144,25 +146,24 @@ def main():
     # 3. Skills Selection
     console.print(Panel("[bold cyan]Step 2: Select Skills[/bold cyan]"))
     skill_names = list(SKILL_CATEGORIES.keys())
-    for idx, s in enumerate(skill_names):
-        console.print(f"[green]{idx + 1}[/green]. {s}")
     
-    selected_skill_indices_str = Prompt.ask("\nEnter the numbers of the skills you want to enable, separated by commas (e.g. 4,5,7)")
+    selected_skill_names = questionary.checkbox(
+        "Select the skills you want to enable (Space to toggle, Enter to confirm):",
+        choices=skill_names
+    ).ask()
+    
+    if selected_skill_names is None:
+        console.print("\n[red]Setup cancelled.[/red]")
+        sys.exit(1)
+        
     selected_skills = []
-    if selected_skill_indices_str.strip():
-        for i_str in selected_skill_indices_str.split(","):
-            try:
-                i = int(i_str.strip()) - 1
-                if 0 <= i < len(skill_names):
-                    category_name = skill_names[i]
-                    selected_skills.extend(SKILL_CATEGORIES[category_name])
-            except ValueError:
-                pass
+    for category_name in selected_skill_names:
+        selected_skills.extend(SKILL_CATEGORIES[category_name])
                 
     console.print(f"\n[cyan]Downloading selected skills from GitHub...[/cyan]")
     os.makedirs("Skills", exist_ok=True)
     for skill_file in selected_skills:
-        url = f"https://raw.githubusercontent.com/EleshVaishnav/Parmana2.0/main/Skills/{skill_file}.py"
+        url = f"https://raw.githubusercontent.com/EleshVaishnav/DeepClaw2.0/main/Skills/{skill_file}.py"
         try:
             r = requests.get(url)
             if r.status_code == 200:
