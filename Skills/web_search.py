@@ -11,8 +11,8 @@ from .registry import registry
             "description": "The search query to look up on the web."
         },
         "max_results": {
-            "type": "string",
-            "description": "Maximum number of results to return (default '5')."
+            "type": "integer",
+            "description": "Maximum number of results to return (default 5)."
         }
     }
 )
